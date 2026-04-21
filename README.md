@@ -241,3 +241,6 @@ kubectl get all
 | `You must be logged in` on kubectl | IAM user not added to EKS access entries | Run the commands in Step 10 |
 | `deployment not found` | K8s manifest not yet applied | Pipeline applies it automatically on first run |
 | `Empty reply from server` | Wrong `targetPort` in service | Match `targetPort` to your app's actual listening port |
+
+Endpoint screenshot
+![alt text](eks.PNG)
