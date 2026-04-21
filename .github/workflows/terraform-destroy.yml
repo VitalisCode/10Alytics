@@ -1,0 +1,51 @@
+name: Destroy Infrastructure
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: 'Type "destroy-all-resources" to confirm'
+        required: true
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  terraform-destroy:
+    runs-on: ubuntu-latest
+    environment: destroy-dev  # Manual approval gate
+
+    steps:
+      - name: Verify Confirmation
+        run: |
+          if [[ "${{ github.event.inputs.confirmation }}" != "destroy-all-resources" ]]; then
+            echo "Incorrect confirmation. Aborting."
+            exit 1
+          fi
+          echo "Confirmed. Proceeding with destruction..."
+
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.0
+
+      - name: Terraform Init
+        working-directory: ./infra
+        run: terraform init
+
+      - name: Terraform Destroy
+        working-directory: ./infra
+        env:
+          TF_VAR_db_username: ${{ secrets.DB_USERNAME }}
+          TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
+          TF_VAR_db_name: ${{ secrets.DB_NAME }}
+        run: terraform destroy -lock=false -auto-approve

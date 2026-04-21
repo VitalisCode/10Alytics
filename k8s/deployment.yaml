@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: devops-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: devops-app
+  template:
+    metadata:
+      labels:
+        app: devops-app
+    spec:
+      containers:
+        - name: devops-app
+          image: 986232522384.dkr.ecr.us-east-1.amazonaws.com/devops-app:latest
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - secretRef:
+                name: db-credentials   #Pulls all DB vars from the kubernetes secret
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
